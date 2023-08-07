@@ -3,9 +3,9 @@ package main
 import (
     "context"
     "fmt"
-    "github.com/fedemoya/mockserver-go-client/pkg/client"
     "github.com/testcontainers/testcontainers-go"
     "github.com/testcontainers/testcontainers-go/wait"
+    "github.com/walletera/mockserver-go-client/pkg/client"
     "io"
     "net/http"
     "net/url"
