@@ -66,6 +66,12 @@ func main() {
         fmt.Printf("request verification failed: %s\n", err.Error())
         return
     }
+
+    err = mockServerClient.Clear(ctx)
+    if err != nil {
+        fmt.Printf("clear request failed: %s\n", err.Error())
+        return
+    }
 }
 
 func runMockserver(ctx context.Context) func(ctx context.Context) {

@@ -33,9 +33,7 @@ func TestClient(t *testing.T) {
 
     rawExpectation, err := os.ReadFile("testdata/expectation.json")
     require.NoError(t, err)
-
     createExpectationMethod := reflect.ValueOf((*Client).CreateExpectation)
-
     expectationId := "055CA455-1DF7-45BB-8535-4F83E7266092"
 
     verifyRequestBody := VerifyRequestBody{
@@ -43,8 +41,9 @@ func TestClient(t *testing.T) {
             Id: expectationId,
         },
     }
-
     verifyRequestMethod := reflect.ValueOf((*Client).VerifyRequest)
+
+    clearMethod := reflect.ValueOf((*Client).Clear)
 
     tests := []struct {
         name          string
@@ -113,6 +112,22 @@ func TestClient(t *testing.T) {
             http.StatusNotAcceptable,
             &RequestHasNotBeenReceived{},
         },
+        {
+            "clear request succeed",
+            clearMethod,
+            nil,
+            nil,
+            http.StatusOK,
+            nil,
+        },
+        {
+            "clear request failed with 400",
+            clearMethod,
+            nil,
+            nil,
+            http.StatusBadRequest,
+            &IncorrectRequestFormat{},
+        },
     }
 
     for _, test := range tests {
@@ -133,11 +148,16 @@ func TestClient(t *testing.T) {
             require.NoError(t, err)
 
             client := NewClient(parsedUrl, http.DefaultClient)
-            callResult := test.clientMethod.Call([]reflect.Value{
+
+            callParams := []reflect.Value{
                 reflect.ValueOf(client),
                 reflect.ValueOf(context.Background()),
-                reflect.ValueOf(test.reqBody),
-            })
+            }
+            if test.reqBody != nil {
+                callParams = append(callParams, reflect.ValueOf(test.reqBody))
+            }
+
+            callResult := test.clientMethod.Call(callParams)
 
             var clientMethodErr any
             if callResult != nil && len(callResult) > 0 {
